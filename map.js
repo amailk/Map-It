@@ -9,6 +9,16 @@ function initMap() { //initialize js function to load the map
   var marker = new google.maps.Marker({
     position: smiletiger,
     map: map, //map where it should appear on
+    draggable: true,
+    animation: google.maps.Animation.DROP,
     title: 'Smile Tiger Coffee Roasters' //appears when you hover over the Marker
   });
+}
+
+function drop() {
+  for (var i = 0; i < markerArray.length; i++) {
+    setTimeout(function() {
+      addMarkermethod();
+    }, i * 200);
+  }
 }
