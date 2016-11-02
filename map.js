@@ -9,7 +9,7 @@ function initMap() {
     {
       featureType: 'water',
       stylers: [
-        {color: '#19a0d8'}
+        {color: '#6b9ba3'}
       ]
     },{
       featureType: 'administrative',
@@ -22,20 +22,20 @@ function initMap() {
       featureType: 'administrative',
       elementType: 'labels.text.fill',
       stylers: [
-        {color: '#e85113'}
+        {color: '#38353d'}
       ]
     },{
       featureType: 'road.highway',
       elementType: 'geometry.stroke',
       stylers: [
-        {color: '#efe9e4'},
+        {color: '#beb8c4'},
         {lightness: -40}
       ]
     },{
       featureType: 'transit.station',
       stylers: [
         {weight: 9 },
-        {hue: '#e85113'}
+        {hue: '#6a726e'}
       ]
     },{
       featureType: 'road.highway',
@@ -60,14 +60,14 @@ function initMap() {
       elementType: 'geometry',
       stylers: [
         {visibility: 'on'},
-        {color: '#f0e4d3'}
+        {color: '#c6ceb9'}
       ]
     },{
       featureType: 'road.highway',
       elementType: 'geometry.fill',
       stylers: [
-        { color: '#efe9e4' },
-        { lightness: -25 }
+        { color: '#cebc9a' },
+        { lightness: -30 }
       ]
     }
   ];
@@ -89,9 +89,9 @@ function initMap() {
 
   var largeInfowindow = new google.maps.InfoWindow();
 
-  var defaultIcon = makeMarkerIcon('0091ff');
+  var defaultIcon = makeMarkerIcon('45968e');
 
-  var highlightedIcon = makeMarkerIcon('FFFF24');
+  var highlightedIcon = makeMarkerIcon('754596');
   for (var i = 0; i < locations.length; i++) {
     var position = locations[i].location;
     var title = locations[i].title;
