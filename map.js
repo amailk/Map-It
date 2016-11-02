@@ -5,7 +5,12 @@ var markers = [];
 
 //initialize js function to load the map
 function initMap() {
-
+  var styles = [
+    {
+      featureType: 'water',
+      stylers: [ {color:'#19a0d8'}]
+    }
+  ]
   //new map instance, load the map in the map div in the html
   map = new google.maps.Map(document.getElementById('map'), {
 
