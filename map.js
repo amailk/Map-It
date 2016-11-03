@@ -89,6 +89,18 @@ function initMap() {
 
   var largeInfowindow = new google.maps.InfoWindow();
 
+  var drawingManager = new google.maps.drawing.DrawingManager({
+    drawingMode: google.maps.drawing.OverlayType.POLYGON,
+    drawingControl: true,
+    drawingControlOptions: {
+      position: google.maps.ControlPosition.TOP_LEFT,
+      drawingModes: [
+        google.maps.drawing.OverlayType.POLYGON
+      ]
+    }
+  });
+
+
   var defaultIcon = makeMarkerIcon('45968e');
 
   var highlightedIcon = makeMarkerIcon('754596');
@@ -121,6 +133,10 @@ function initMap() {
 
   document.getElementById('show-coffee').addEventListener('click', showCoffee);
   document.getElementById('hide-coffee').addEventListener('click', hideCoffee);
+
+  document.getElementById('toggle-drawing').addEventListener('click', function() {
+    toggleDrawing(drawingManager);
+  });
 }
 
   function populateInfoWindow(marker, infowindow) {
@@ -184,4 +200,12 @@ function makeMarkerIcon(markerColor) {
     new google.maps.Point(10, 34),
     new google.maps.Size(21, 34));
   return markerImage;
+}
+
+function toggleDrawing(drawingManager) {
+  if(drawingManager.map) {
+    drawingManager.setMap(null);
+  } else {
+    drawingManager.setMap(map);
+  }
 }
