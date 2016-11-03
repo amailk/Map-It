@@ -81,7 +81,7 @@ function initMap() {
 
   var locations = [
     {title: "Smile Tiger Coffee Roasters", location: {lat: 43.456015, lng: -80.491675}},
-    {title: "Berlin Bicycle Cafe", location: {lat:43.453610, lng:-80.518524}},
+    {title: "Berlin Bicycle Cafe", location: {lat: 43.453610, lng:-80.518524}},
     {title: "Balzac's Kitchener", location: {lat: 43.450938, lng: -80.498264}},
     {title: "Mercury Coffee", location: {lat: 43.451595, lng: -80.489149}},
     {title: "Cafe Pyrus", location: {lat: 43.449760, lng: -80.491712}}
@@ -106,6 +106,7 @@ function initMap() {
     markers.push(marker);
 
     marker.addListener('click', function() {
+      console.log("marker listener, calling populateInfoWindow");
       populateInfoWindow(this, largeInfowindow);
     });
 
@@ -124,12 +125,39 @@ function initMap() {
 
   function populateInfoWindow(marker, infowindow) {
     if(infowindow.marker != marker) {
+      infowindow.setContent('');
       infowindow.marker = marker;
-      infowindow.setContent('<div>' + marker.title + '</div>');
-      infowindow.open(map, marker);
       infowindow.addListener('closeclick', function() {
         infowindow.marker = null;
       });
+
+      var streetViewService = new google.maps.StreetViewService();
+      var radius = 50;
+
+      function getStreetView(data, status) {
+        if (status == google.maps.StreetViewStatus.OK) {
+          var nearStreetViewLocation = data.location.latLng;
+          var heading = google.maps.geometry.spherical.computeHeading(
+            nearStreetViewLocation, marker.position);
+
+          infowindow.setContent('<div>' + marker.title + '</div><div id="pano">xxxx</div>');
+
+          var panoramaOptions = {
+            position: nearStreetViewLocation,
+            pov: {
+              heading: heading,
+              pitch: 30
+            }
+          };
+
+          var panorama = new google.maps.StreetViewPanorama(
+              document.getElementById('pano'), panoramaOptions);
+        } else {
+          infowindow.setContent('<div>' + marker.title + '</div>' + '<div>No Street View Found</div>');
+        }
+      }
+      streetViewService.getPanoramaByLocation(marker.position, radius, getStreetView);
+      infowindow.open(map, marker);
     }
   }
 
