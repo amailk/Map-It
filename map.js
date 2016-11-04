@@ -3,6 +3,8 @@ var map;
 
 var markers = [];
 
+var polygon = null;
+
 //initialize js function to load the map
 function initMap() {
   var styles = [
@@ -131,11 +133,37 @@ function initMap() {
     });
   }
 
+  //var area = google.maps.geometry.spherical.computeArea(polygon.getPath());
+    //window.alert(area + "SQUARE METERS");
+//});
+
   document.getElementById('show-coffee').addEventListener('click', showCoffee);
   document.getElementById('hide-coffee').addEventListener('click', hideCoffee);
 
   document.getElementById('toggle-drawing').addEventListener('click', function() {
     toggleDrawing(drawingManager);
+  });
+
+  document.getElementById('zoom-to-area').addEventListener('click', function() {
+    zoomToArea();
+  });
+
+  drawingManager.addListener('overlaycomplete', function(event) {
+    if (polygon) {
+      polygon.setMap(null);
+      hideCoffee(markers);
+    }
+
+    drawingManager.setDrawingMode(null);
+
+    polygon = event.overlay;
+    polygon.setEditable(true);
+
+    searchWithinPolygon();
+
+    searchWithinPolygon();
+    polygon.getPath().addListener('set_at', searchWithinPolygon);
+    polygon.getPath().addListener('insert_at', searchWithinPolygon);
   });
 }
 
@@ -205,7 +233,43 @@ function makeMarkerIcon(markerColor) {
 function toggleDrawing(drawingManager) {
   if(drawingManager.map) {
     drawingManager.setMap(null);
+    if (polygon !== null) {
+      polygon.setMap(null);
+    }
   } else {
     drawingManager.setMap(map);
+  }
+}
+
+function searchWithinPolygon() {
+  for (var i = 0; i < markers.length; i++) {
+    if (google.maps.geometry.poly.containsLocation(markers[i].position, polygon)) {
+      markers[i].setMap(map);
+    } else {
+      markers[i].setMap(null);
+    }
+  }
+}
+
+function zoomToArea() {
+
+  var geocoder = new google.maps.Geocoder();
+
+  var address = document.getElementById('zoom-to-area-text').value;
+
+  if (address == '') {
+    window.alert('You must enter an area, or address.');
+  } else {
+    geocoder.geocode(
+      {address: address,
+      componentRestrictions: {locality: 'Kitchener'}
+    }, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+        map.setCenter(results[0].geometry.location);
+        map.setZoom(15);
+      } else {
+        window.alert('We could not find that location - try entering a more' + ' specific place.');
+      }
+    });
   }
 }
