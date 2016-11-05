@@ -280,11 +280,11 @@ function zoomToArea() {
 
 function searchWithinTime() {
 
-  var distanceMatrixService = new google.maps.distanceMatrixService;
+  var distanceMatrixService = new google.maps.DistanceMatrixService;
   var address = document.getElementById('search-within-time-text').value;
 
   if (address == '') {
-    window.alert('You must enter an address');
+    window.alert('You must enter an address.');
   } else {
     hideCoffee();
 
@@ -301,7 +301,7 @@ function searchWithinTime() {
       travelMode: google.maps.TravelMode[mode],
       unitSystem: google.maps.UnitSystem.IMPERIAL,
     }, function(response, status) {
-      if (status !== google.maps.distanceMatrixStatus.OK) {
+      if (status !== google.maps.DistanceMatrixStatus.OK) {
         window.alert('Error was: ' + status);
       } else {
         displayMarkersWithinTime(response);
