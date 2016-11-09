@@ -328,7 +328,9 @@ function displayMarkersWithinTime(response) {
           markers[i].setMap(map);
           atLeastOne = true;
           var infowindow = new google.maps.InfoWindow({
-            content: durationText + ' away, ' + distanceText
+            content: durationText + ' away, ' + distanceText +
+            '<div><input type=\"button\" value=\"View Route\" onclick=' +
+            '\"displayDirections(&quot;' + origins[i] + '&quot;);\"></input></div>'
           });
 
           infowindow.open(map, markers[i]);
@@ -344,3 +346,36 @@ function displayMarkersWithinTime(response) {
     window.alert('We could not find any locations within that distance!');
   }
 }
+
+function displayDirections(origin) {
+  hideCoffee();
+  var directionsService = new google.maps.DirectionsService;
+
+  var destinationAddress =
+  document.getElementById('search-within-time-text').value;
+
+  var mode = document.getElementById('mode').value;
+  directionsService.route({
+    origin: origin,
+    destination: destinationAddress,
+    travelMode: google.maps.TravelMode[mode]
+  }, function(response, status) {
+    if (status === google.maps.DirectionsStatus.OK) {
+      var directionsDisplay = new google.maps.DirectionsRenderer({
+        map: map,
+        directions: response,
+        draggable: true,
+        polylineOptions: {
+          strokeColor: 'green'
+        }
+      });
+    } else {
+      window.alert('Directions request failed due to ' + status);
+    }
+  });
+}
+
+
+
+
+https://maps.googleapis.com/maps/api/directions/json?origin=florence&destination=Milan&waypoints=optimize:true|genoa|bologna|venice&key=AIzaSyAJxQaoKzsA4DrJYlXGkhy_ijW3wRVf5EI
