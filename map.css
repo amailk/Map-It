@@ -22,8 +22,8 @@ h1 {
   text-align: center;
 }
 
-#hide-listings,
-#show-listings {
+#hide-coffee,
+#show-coffee {
   width: 48%;
 }
 
@@ -58,6 +58,7 @@ hr {
   height: 200px;
 }
 
+#places-search,
 #search-within-time-text {
   width: 84%;
 }

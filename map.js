@@ -5,6 +5,8 @@ var markers = [];
 
 var polygon = null;
 
+var placeMarkers = [];
+
 //initialize js function to load the map
 function initMap() {
   var styles = [
@@ -81,6 +83,18 @@ function initMap() {
     mapTypeControl: false
   });
 
+  var timeAutocomplete = new google.maps.places.Autocomplete(
+    document.getElementById('search-within-time-text'));
+
+  var zoomAutocomplete = new google.maps.places.Autocomplete(
+    document.getElementById('zoom-to-area-text'));
+
+  zoomAutocomplete.bindTo('bounds', map);
+
+  var searchBox = new google.maps.places.SearchBox(
+    document.getElementById('places-search'));
+  searchBox.setBounds(map.getBounds());
+
   var locations = [
     {title: "Smile Tiger Coffee Roasters", location: {lat: 43.456015, lng: -80.491675}},
     {title: "Berlin Bicycle Cafe", location: {lat: 43.453610, lng:-80.518524}},
@@ -120,7 +134,6 @@ function initMap() {
     markers.push(marker);
 
     marker.addListener('click', function() {
-      console.log("marker listener, calling populateInfoWindow");
       populateInfoWindow(this, largeInfowindow);
     });
 
@@ -138,7 +151,9 @@ function initMap() {
 //});
 
   document.getElementById('show-coffee').addEventListener('click', showCoffee);
-  document.getElementById('hide-coffee').addEventListener('click', hideCoffee);
+  document.getElementById('hide-coffee').addEventListener('click', function() {
+    hideMarkers(markers);
+  });
 
   document.getElementById('toggle-drawing').addEventListener('click', function() {
     toggleDrawing(drawingManager);
@@ -152,10 +167,16 @@ function initMap() {
     searchWithinTime();
   });
 
+  searchBox.addListener('places_changed', function() {
+    searchBoxPlaces(this);
+  });
+
+  document.getElementById('go-places').addEventListener('click', textSearchPlaces);
+
   drawingManager.addListener('overlaycomplete', function(event) {
     if (polygon) {
       polygon.setMap(null);
-      hideCoffee(markers);
+      hideMarkers(markers);
     }
 
     drawingManager.setDrawingMode(null);
@@ -188,7 +209,7 @@ function initMap() {
           var heading = google.maps.geometry.spherical.computeHeading(
             nearStreetViewLocation, marker.position);
 
-          infowindow.setContent('<div>' + marker.title + '</div><div id="pano">xxxx</div>');
+          infowindow.setContent('<div>' + marker.title + '</div><div id="pano"></div>');
 
           var panoramaOptions = {
             position: nearStreetViewLocation,
@@ -218,7 +239,7 @@ function showCoffee() {
   map.fitBounds(bounds);
 }
 
-function hideCoffee() {
+function hideMarkers(markers) {
   for (var i = 0; i < markers.length; i ++) {
     markers[i].setMap(null);
   }
@@ -286,7 +307,7 @@ function searchWithinTime() {
   if (address == '') {
     window.alert('You must enter an address.');
   } else {
-    hideCoffee();
+    hideMarkers(markers);
 
     var origins = [];
     for (var i=0; i<markers.length; i++) {
@@ -337,7 +358,7 @@ function displayMarkersWithinTime(response) {
           markers[i].infowindow = infowindow;
           google.maps.event.addListener(markers[i], 'click', function() {
             this.infowindow.close();
-          })
+          });
         }
       }
     }
@@ -348,7 +369,7 @@ function displayMarkersWithinTime(response) {
 }
 
 function displayDirections(origin) {
-  hideCoffee();
+  hideMarkers(markers);
   var directionsService = new google.maps.DirectionsService;
 
   var destinationAddress =
@@ -375,7 +396,58 @@ function displayDirections(origin) {
   });
 }
 
+function searchBoxPlaces(searchBox) {
+  hideMarkers(placeMarkers);
+  var places = searchBox.getPlaces();
+  createMarkersForPlaces(places);
+  if(places.length == 0) {
+    window.alert('We did not find any places matching that search!');
+  }
+}
 
+function textSearchPlaces(places) {
+  var bounds = map.getBounds();
+  hideMarkers(placeMarkers);
+  var placesService = new google.maps.places.PlacesService(map);
+  placesService.textSearch({
+    query: document.getElementById('places-search').value,
+    bounds: bounds
+  }, function(results, status) {
+    if (status === google.maps.places.PlacesServiceStatus.OK) {
+      createMarkersForPlaces(results);
+    }
+  });
+}
 
+function createMarkersForPlaces(places) {
+  var bounds = new google.maps.LatLngBounds();
+  for (var i = 0; i < places.length; i++) {
+    var place = places[i];
+    var icon = {
+      url: place.icon,
+      size: new google.maps.Size(35, 35),
+      origin: new google.maps.Point(0,0),
+      anchor: new google.maps.Point(15, 24),
+      scaledSize: new google.maps.Size(25, 25)
+    };
 
-https://maps.googleapis.com/maps/api/directions/json?origin=florence&destination=Milan&waypoints=optimize:true|genoa|bologna|venice&key=AIzaSyAJxQaoKzsA4DrJYlXGkhy_ijW3wRVf5EI
+    var marker = new google.maps.Marker({
+      map: map,
+      icon: icon,
+      title: place.name,
+      position: place.geometry. location,
+      id: place.id
+    });
+    marker.addListener('click', function() {
+      getPlacesDetails(this,place);
+    });
+
+    placeMarkers.push(marker);
+    if (place.geometry.viewport) {
+      bounds.union(place.geometry.viewport);
+    } else {
+      bounds.extend(place.geometry.location);
+    }
+  }
+  map.fitBounds(bounds);
+}
